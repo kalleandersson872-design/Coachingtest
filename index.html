@@ -90,11 +90,11 @@
     ];
     const AREAS = ["Ekonomi","Fysisk hälsa","Relationer","Sysselsättning"];
 
-    // --- KONFIGURATION för fördjupande test och Swish ---
+    // --- KONFIGURATION (uppdaterad enligt dina uppgifter) ---
     const CONFIG = {
       priceSEK: 50,
-      swishPayee: "SWISH_NUMMER_HÄR",                 // Byt till ditt Swish-nummer (t.ex. 1231231231)
-      apiBase: "https://DIN-WORKER-URL.workers.dev",  // Byt till din Cloudflare Worker URL
+      swishPayee: "0763044124",
+      apiBase: "https://qol-linker.kalleandersson872.workers.dev",
       links: {
         "Sysselsättning": "https://kalleandersson872-design.github.io/sysselsattning/",
         "Ekonomi":        "https://kalleandersson872-design.github.io/ekonomi1/",
@@ -104,8 +104,8 @@
     };
 
     // ------------------ STATE ------------------
-    let idx = 0;                   // 0-based index
-    const answers = {};            // id -> value
+    let idx = 0;
+    const answers = {};
     const app = document.getElementById('app');
 
     // ------------------ SCORING & HELPERS ------------------
@@ -147,10 +147,10 @@
 
     // ------------------ QoL-KURVA ------------------
     function baseQoL(age){
-      const mu = 45;                 // topp kring medelålder
-      const sigma = 18;              // spridning
+      const mu = 45;
+      const sigma = 18;
       const gauss = Math.exp(-Math.pow(age - mu, 2) / (2 * sigma * sigma));
-      return 20 + 80 * gauss;        // 20–100
+      return 20 + 80 * gauss; // 20–100
     }
     function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
@@ -179,14 +179,12 @@
       ctx.clearRect(0,0,W,H);
       ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
 
-      // y-grid 0..100
       for(let y=0; y<=100; y+=20){
         const yy = y1 - (y/100)*(y1 - y0);
         ctx.beginPath(); ctx.moveTo(x0, yy); ctx.lineTo(x1, yy); ctx.stroke();
         ctx.fillStyle = '#6b7280'; ctx.font = '12px system-ui';
         ctx.fillText(String(y), 8, yy+4);
       }
-      // x-grid
       const xTicks = [18,30,40,50,60,70,80,90];
       xTicks.forEach(ax=>{
         const xx = x0 + ((ax-18)/(90-18))*(x1-x0);
@@ -199,7 +197,6 @@
 
       const {ages, values} = computeQoLCurve(age, score);
 
-      // kurva
       ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
       ctx.beginPath();
       ages.forEach((a,i)=>{
@@ -208,19 +205,17 @@
       });
       ctx.stroke();
 
-      // markör för aktuell punkt
       const px = sx(age), py = sy(score);
       ctx.fillStyle = '#111';
       ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
 
-      // axeltitlar
       ctx.fillStyle = '#111'; ctx.font = '12px system-ui';
       ctx.fillText('Ålder', (x0+x1)/2 - 14, H-2);
       ctx.save(); ctx.translate(12, (y0+y1)/2 + 20); ctx.rotate(-Math.PI/2);
       ctx.fillText('QoL (0–100)', 0, 0); ctx.restore();
     }
 
-    // ------------------ SWISH & TEMP-LÄNK ------------------
+    // ------------------ SWISH & REF ------------------
     function makeRef(area){
       const rnd = Math.random().toString(36).slice(2,8).toUpperCase();
       return `FOR${CONFIG.priceSEK}-${area.replace(/[^A-Za-zÅÄÖåäö]/g,'')}-${Date.now()}-${rnd}`;
@@ -236,11 +231,9 @@
         const {scores} = summary();
         const rec = recs(scores);
 
-        // QoL – overall = medel av alla områden
         const overall = Math.round((scores['Ekonomi'] + scores['Fysisk hälsa'] + scores['Relationer'] + scores['Sysselsättning']) / 4);
         const defaultAge = 38;
 
-        // Lägsta område för upsell
         const sorted = Object.entries(scores).sort((a,b)=>a[1]-b[1]);
         const lowest = sorted[0];
         const lowestArea = lowest ? lowest[0] : AREAS[0];
@@ -303,7 +296,7 @@
               <a id="swishBtn" class="btn" href="#">Öppna Swish</a>
               <button id="paidBtn" class="btn sec">Jag har betalat</button>
             </div>
-            <div class="footnote">Obs: Den låsta engångslänken skapas av din server (Cloudflare Worker). Byt <code>apiBase</code> och <code>swishPayee</code> i koden.</div>
+            <div class="footnote">Obs: Den låsta engångslänken skapas av din Cloudflare Worker. Byt <code>apiBase</code> och testa.</div>
           </div>
 
           <div class="row" style="margin-top:12px">
@@ -348,7 +341,7 @@
         swishA.href = swishLink(CONFIG.swishPayee, CONFIG.priceSEK, ref);
         swishA.setAttribute('rel','noopener');
 
-        // Efter betalning -> be servern skapa signerad, IP-låst, tidsbegränsad länk
+        // Efter betalning -> skapa signerad, IP-låst, tidsbegränsad länk via din Worker
         document.getElementById('paidBtn').onclick = async ()=>{
           try{
             const res = await fetch(`${CONFIG.apiBase}/create-link`,{
