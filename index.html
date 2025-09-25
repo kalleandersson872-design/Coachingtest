@@ -1,13 +1,13 @@
 <!doctype html>
-
 <html lang="sv">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coachingtest – Livskvalitet</title>
   <style>
-    :root{--bg:#f7f7f8;--card:#ffffff;--ink:#111;--muted:#6b7280;--line:#e5e7eb;--accent:#111;--good:#16a34a;--warn:#f59e0b;--bad:#ef4444}
-    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--ink)}
+    :root{--bg:#f7f7f8;--card:#ffffff;--ink:#111;--muted:#6b7280;--line:#e5e7eb}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--ink)}
     .wrap{max-width:900px;margin:0 auto;padding:24px}
     .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.06);padding:24px}
     h1{font-size:clamp(20px,3vw,28px);margin:0 0 12px;font-weight:800}
@@ -38,10 +38,11 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="card" id="app">
-      <!-- Innehåll byggs av JS -->
-    </div>
-  </div>  <script>
+    <div class="card" id="app"></div>
+  </div>
+
+  <script>
+    // ------------------ DATA ------------------
     const QUESTIONS = [
       { id:1, area:"Ekonomi", text:"Jag har en tydlig överblick över mina inkomster och utgifter.", type:"scale" },
       { id:2, area:"Ekonomi", text:"Jag har en buffert/sparande som gör att jag känner mig trygg.", type:"scale" },
@@ -53,6 +54,7 @@
       { id:8, area:"Ekonomi", text:"Jag har en långsiktig plan för min ekonomi.", type:"yn" },
       { id:9, area:"Ekonomi", text:"Min ekonomi skapar stress i mitt liv.", type:"yn", reverse:true },
       { id:10, area:"Ekonomi", text:"Jag känner mig nöjd med min ekonomiska situation just nu.", type:"scale" },
+
       { id:11, area:"Fysisk hälsa", text:"Jag äter en balanserad och näringsrik kost.", type:"scale" },
       { id:12, area:"Fysisk hälsa", text:"Jag tränar regelbundet (minst 2 gånger i veckan).", type:"yn" },
       { id:13, area:"Fysisk hälsa", text:"Jag känner mig pigg och energifylld under dagarna.", type:"scale" },
@@ -63,6 +65,7 @@
       { id:18, area:"Fysisk hälsa", text:"Jag går på hälsokontroller eller följer upp min hälsa vid behov.", type:"yn" },
       { id:19, area:"Fysisk hälsa", text:"Jag är ofta sjuk eller upplever återkommande smärta.", type:"yn", reverse:true },
       { id:20, area:"Fysisk hälsa", text:"Jag är nöjd med min fysiska hälsa i nuläget.", type:"scale" },
+
       { id:21, area:"Relationer", text:"Jag har personer i mitt liv som jag kan lita på.", type:"scale" },
       { id:22, area:"Relationer", text:"Jag upplever att mina relationer ger mig energi snarare än tar energi.", type:"scale" },
       { id:23, area:"Relationer", text:"Jag har en nära vän som jag kan prata öppet med.", type:"yn" },
@@ -73,6 +76,7 @@
       { id:28, area:"Relationer", text:"Jag känner mig ofta ensam.", type:"yn", reverse:true },
       { id:29, area:"Relationer", text:"Jag upplever att jag bidrar positivt till andras liv.", type:"scale" },
       { id:30, area:"Relationer", text:"Jag är nöjd med kvaliteten på mina relationer.", type:"scale" },
+
       { id:31, area:"Sysselsättning", text:"Jag är nöjd med mitt arbete eller min huvudsakliga sysselsättning.", type:"scale" },
       { id:32, area:"Sysselsättning", text:"Jag känner att jag utvecklas i mitt arbete/studier.", type:"scale" },
       { id:33, area:"Sysselsättning", text:"Jag känner mig ofta stressad av mitt arbete eller mina studier.", type:"yn", reverse:true },
@@ -84,14 +88,27 @@
       { id:39, area:"Sysselsättning", text:"Jag känner mig uppskattad av kollegor/medstudenter/arbetsgivare.", type:"scale" },
       { id:40, area:"Sysselsättning", text:"Jag skulle vilja förändra min nuvarande sysselsättning.", type:"yn", reverse:true },
     ];
-
     const AREAS = ["Ekonomi","Fysisk hälsa","Relationer","Sysselsättning"];
 
-    let idx = 0; // 0-based
-    const answers = {}; // id -> value
+    // --- KONFIGURATION för fördjupande test och Swish ---
+    const CONFIG = {
+      priceSEK: 50,
+      swishPayee: "SWISH_NUMMER_HÄR",                 // Byt till ditt Swish-nummer (t.ex. 1231231231)
+      apiBase: "https://DIN-WORKER-URL.workers.dev",  // Byt till din Cloudflare Worker URL
+      links: {
+        "Sysselsättning": "https://kalleandersson872-design.github.io/sysselsattning/",
+        "Ekonomi":        "https://kalleandersson872-design.github.io/ekonomi1/",
+        "Relationer":     "https://kalleandersson872-design.github.io/relationer/",
+        "Fysisk hälsa":   "https://kalleandersson872-design.github.io/fysisk-halsa-test/",
+      }
+    };
 
+    // ------------------ STATE ------------------
+    let idx = 0;                   // 0-based index
+    const answers = {};            // id -> value
     const app = document.getElementById('app');
 
+    // ------------------ SCORING & HELPERS ------------------
     function mapAnswerToScore(q, value){
       if(q.type === 'scale'){
         const v = Number(value);
@@ -128,10 +145,108 @@
 
     function progress(){ return Math.round(((idx+1)/QUESTIONS.length)*100); }
 
+    // ------------------ QoL-KURVA ------------------
+    function baseQoL(age){
+      const mu = 45;                 // topp kring medelålder
+      const sigma = 18;              // spridning
+      const gauss = Math.exp(-Math.pow(age - mu, 2) / (2 * sigma * sigma));
+      return 20 + 80 * gauss;        // 20–100
+    }
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+    function computeQoLCurve(currentAge, currentScore){
+      const ages = [];
+      const values = [];
+      const bAtAge = baseQoL(currentAge);
+      const offset = currentScore - bAtAge; // justera så kurvan passerar användarens punkt
+      for(let a=18; a<=90; a++){
+        const v = clamp(baseQoL(a) + offset, 0, 100);
+        ages.push(a);
+        values.push(v);
+      }
+      return { ages, values };
+    }
+
+    function drawQoLCurve(canvas, age, score){
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width = canvas.clientWidth;
+      const H = canvas.height = Math.max(220, canvas.clientHeight || 260);
+
+      const m = {l:48, r:16, t:16, b:36};
+      const x0 = m.l, y0 = m.t, x1 = W - m.r, y1 = H - m.b;
+
+      ctx.clearRect(0,0,W,H);
+      ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+
+      // y-grid 0..100
+      for(let y=0; y<=100; y+=20){
+        const yy = y1 - (y/100)*(y1 - y0);
+        ctx.beginPath(); ctx.moveTo(x0, yy); ctx.lineTo(x1, yy); ctx.stroke();
+        ctx.fillStyle = '#6b7280'; ctx.font = '12px system-ui';
+        ctx.fillText(String(y), 8, yy+4);
+      }
+      // x-grid
+      const xTicks = [18,30,40,50,60,70,80,90];
+      xTicks.forEach(ax=>{
+        const xx = x0 + ((ax-18)/(90-18))*(x1-x0);
+        ctx.beginPath(); ctx.moveTo(xx, y0); ctx.lineTo(xx, y1); ctx.stroke();
+        ctx.fillStyle = '#6b7280'; ctx.fillText(String(ax), xx-8, H-12);
+      });
+
+      const sx = (a)=> x0 + ((a-18)/(90-18))*(x1-x0);
+      const sy = (v)=> y1 - (v/100)*(y1 - y0);
+
+      const {ages, values} = computeQoLCurve(age, score);
+
+      // kurva
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ages.forEach((a,i)=>{
+        const xx = sx(a), yy = sy(values[i]);
+        if(i===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+      });
+      ctx.stroke();
+
+      // markör för aktuell punkt
+      const px = sx(age), py = sy(score);
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2); ctx.fill();
+
+      // axeltitlar
+      ctx.fillStyle = '#111'; ctx.font = '12px system-ui';
+      ctx.fillText('Ålder', (x0+x1)/2 - 14, H-2);
+      ctx.save(); ctx.translate(12, (y0+y1)/2 + 20); ctx.rotate(-Math.PI/2);
+      ctx.fillText('QoL (0–100)', 0, 0); ctx.restore();
+    }
+
+    // ------------------ SWISH & TEMP-LÄNK ------------------
+    function makeRef(area){
+      const rnd = Math.random().toString(36).slice(2,8).toUpperCase();
+      return `FOR${CONFIG.priceSEK}-${area.replace(/[^A-Za-zÅÄÖåäö]/g,'')}-${Date.now()}-${rnd}`;
+    }
+    function swishLink(payee, amount, message){
+      const params = new URLSearchParams({ version:"1", payee: String(payee), amount: String(amount), message });
+      return `swish://paymentrequest?${params.toString()}`;
+    }
+
+    // ------------------ RENDER ------------------
     function render(){
       if(idx >= QUESTIONS.length){
         const {scores} = summary();
         const rec = recs(scores);
+
+        // QoL – overall = medel av alla områden
+        const overall = Math.round((scores['Ekonomi'] + scores['Fysisk hälsa'] + scores['Relationer'] + scores['Sysselsättning']) / 4);
+        const defaultAge = 38;
+
+        // Lägsta område för upsell
+        const sorted = Object.entries(scores).sort((a,b)=>a[1]-b[1]);
+        const lowest = sorted[0];
+        const lowestArea = lowest ? lowest[0] : AREAS[0];
+        const lowestVal  = lowest ? lowest[1] : 0;
+        const ref = makeRef(lowestArea);
+
         app.innerHTML = `
           <h1>Ditt resultat</h1>
           <div class="grid">
@@ -157,14 +272,107 @@
 
           ${rec.length? `<div class="stack"><strong>Rekommendationer</strong><ul class="list">${rec.map(r=>`<li>${r}</li>`).join('')}</ul></div>` : ''}
 
+          <div class="hr"></div>
+
+          <div class="stack">
+            <strong>QoL-kurva (hypotetisk) vs ålder</strong>
+            <div class="row" style="align-items:center">
+              <label class="muted">Ålder
+                <input id="ageInput" type="number" min="18" max="90" value="${defaultAge}" style="margin-left:8px;width:80px;padding:8px;border:1px solid #e5e7eb;border-radius:8px" />
+              </label>
+              <div class="muted">Nuvarande QoL (medel): <strong>${overall}%</strong></div>
+            </div>
+            <canvas id="qolCanvas" style="width:100%;height:260px"></canvas>
+            <div class="row">
+              <button class="btn ghost" id="dlPng">Ladda ner bild (PNG)</button>
+              <button class="btn ghost" id="dlCsv">Exportera CSV</button>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="stack" id="upsell">
+            <strong>Fördjupande test</strong>
+            <div class="muted">Lägst resultat: <strong>${lowestArea}</strong> (${lowestVal}%). Erbjudande: fördjupande test för <strong>${CONFIG.priceSEK} kr</strong> via Swish.</div>
+            <div class="row" style="align-items:center">
+              <div class="muted">Mottagare (Swish): <strong>${CONFIG.swishPayee}</strong></div>
+              <div class="muted">Belopp: <strong>${CONFIG.priceSEK} kr</strong></div>
+              <div class="muted">Meddelande/Ref: <strong id="refSpan">${ref}</strong></div>
+            </div>
+            <div class="row">
+              <a id="swishBtn" class="btn" href="#">Öppna Swish</a>
+              <button id="paidBtn" class="btn sec">Jag har betalat</button>
+            </div>
+            <div class="footnote">Obs: Den låsta engångslänken skapas av din server (Cloudflare Worker). Byt <code>apiBase</code> och <code>swishPayee</code> i koden.</div>
+          </div>
+
           <div class="row" style="margin-top:12px">
             <button class="btn" onclick="location.reload()">Gör om testet</button>
             <button class="btn sec" onclick="window.print()">Skriv ut / PDF</button>
           </div>
         `;
+
+        // QoL – interaktioner
+        const canvas = document.getElementById('qolCanvas');
+        const ageEl = document.getElementById('ageInput');
+        function redraw(){
+          const age = Math.min(90, Math.max(18, Number(ageEl.value)||defaultAge));
+          drawQoLCurve(canvas, age, overall);
+        }
+        ageEl.addEventListener('input', redraw);
+        if (typeof ResizeObserver !== 'undefined') {
+          const observer = new ResizeObserver(redraw); observer.observe(canvas);
+        }
+        redraw();
+
+        document.getElementById('dlPng').onclick = ()=>{
+          const link = document.createElement('a');
+          link.download = 'qol_kurva.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        };
+        document.getElementById('dlCsv').onclick = ()=>{
+          const age = Math.min(90, Math.max(18, Number(ageEl.value)||defaultAge));
+          const {ages, values} = computeQoLCurve(age, overall);
+          let csv = 'age,qol\n';
+          for(let i=0;i<ages.length;i++){ csv += ages[i] + ',' + values[i].toFixed(0) + '\n'; }
+          const blob = new Blob([csv], {type:'text/csv'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'qol_kurva.csv'; a.click();
+          URL.revokeObjectURL(url);
+        };
+
+        // Swish deep link (mobil)
+        const swishA = document.getElementById('swishBtn');
+        swishA.href = swishLink(CONFIG.swishPayee, CONFIG.priceSEK, ref);
+        swishA.setAttribute('rel','noopener');
+
+        // Efter betalning -> be servern skapa signerad, IP-låst, tidsbegränsad länk
+        document.getElementById('paidBtn').onclick = async ()=>{
+          try{
+            const res = await fetch(`${CONFIG.apiBase}/create-link`,{
+              method:'POST',
+              headers:{'content-type':'application/json'},
+              body: JSON.stringify({ area: lowestArea, ref })
+            });
+            if(!res.ok) throw new Error('Serverfel');
+            const data = await res.json(); // { url, validForMinutes }
+            const cont = document.getElementById('upsell');
+            cont.innerHTML = `
+              <strong>Fördjupande test</strong>
+              <div class="muted">Tack! Din tillfälliga länk för <strong>${lowestArea}</strong> är skapad.</div>
+              <a class="btn" href="${data.url}" target="_blank" rel="noopener">Fortsätt till fördjupande test</a>
+              <div class="footnote">Länken är låst till din IP och giltig i ca ${data.validForMinutes} minuter.</div>
+            `;
+          }catch(e){
+            alert('Kunde inte skapa länk. Kontrollera att apiBase pekar på din Worker och försök igen.');
+          }
+        };
         return;
       }
 
+      // --- FRÅGEVY ---
       const q = QUESTIONS[idx];
       const val = answers[q.id];
       const pct = progress();
@@ -212,6 +420,8 @@
       document.getElementById('nextBtn').onclick = ()=>{ if(answers[q.id]!==undefined){ idx++; render(); }};
     }
 
+    // Init
     render();
-  </script></body>
-</html> 
+  </script>
+</body>
+</html>
