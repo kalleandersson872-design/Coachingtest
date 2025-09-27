@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coachingtest – Livskvalitet</title>
   <style>
-    :root{--bg:#f7f7f8;--card:#ffffff;--ink:#111;--muted:#6b7280;--line:#e5e7eb}
+    :root{
+      --bg:#f7f7f8;--card:#ffffff;--ink:#111;--muted:#6b7280;--line:#e5e7eb;
+      --grad: linear-gradient(90deg,#ef4444 0%, #f59e0b 50%, #16a34a 100%); /* röd→gul→grön */
+    }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--ink)}
     .wrap{max-width:900px;margin:0 auto;padding:24px}
@@ -24,13 +27,35 @@
     .qtext{font-size:18px;font-weight:600;margin-bottom:12px}
     .actions{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
     .stack{display:grid;gap:12px}
-    .bar{height:16px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-    .bar>div{height:100%;background:#111}
     .grid{display:grid;gap:16px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
     .footnote{font-size:12px;color:var(--muted)}
     .hr{height:1px;background:var(--line);margin:12px 0}
-    .scoreBox{font-size:48px;font-weight:900;text-align:center;padding:20px;border-radius:16px}
+
+    /* Poängvisning */
+    .scoreWrap{display:grid;gap:8px;align-items:center}
+    .gbar{position:relative;height:16px;border-radius:999px;background:#e5e7eb;overflow:hidden}
+    .gfill{height:100%;width:0;background:var(--grad)}
+    .scoreBox{font-size:36px; /* mindre än tidigare */ font-weight:900;text-align:center;padding:4px 0}
+    .scoreSub{font-size:14px;color:var(--muted);text-align:center}
+
+    /* Områdesstaplar med samma färgtema */
+    .bar{height:16px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+    .bar>div{height:100%;background:var(--grad);width:0}
+
+    /* CTA – mer synlig */
+    .cta{
+      display:inline-block; text-decoration:none; color:#fff; font-weight:800;
+      padding:16px 20px; border-radius:20px; background:var(--grad); border:none;
+      box-shadow:0 10px 20px rgba(245,158,11,.25), 0 2px 6px rgba(0,0,0,.08);
+      transition:transform .05s ease, box-shadow .2s ease; font-size:16px;
+    }
+    .cta:hover{transform:translateY(-1px); box-shadow:0 14px 28px rgba(245,158,11,.35), 0 4px 10px rgba(0,0,0,.1)}
+    .cta:focus{outline:3px solid rgba(17,17,17,.3); outline-offset:3px}
+    .ctaWrap{display:flex;justify-content:center}
+
+    /* Sekundära knappar rad */
+    .btnRow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
   </style>
 </head>
 <body>
@@ -51,7 +76,6 @@
       { id:8, area:"Ekonomi", text:"Jag har en långsiktig plan för min ekonomi.", type:"yn" },
       { id:9, area:"Ekonomi", text:"Min ekonomi skapar stress i mitt liv.", type:"yn", reverse:true },
       { id:10, area:"Ekonomi", text:"Jag känner mig nöjd med min ekonomiska situation just nu.", type:"scale" },
-
       { id:11, area:"Fysisk hälsa", text:"Jag äter en balanserad och näringsrik kost.", type:"scale" },
       { id:12, area:"Fysisk hälsa", text:"Jag tränar regelbundet (minst 2 gånger i veckan).", type:"yn" },
       { id:13, area:"Fysisk hälsa", text:"Jag känner mig pigg och energifylld under dagarna.", type:"scale" },
@@ -62,7 +86,6 @@
       { id:18, area:"Fysisk hälsa", text:"Jag går på hälsokontroller eller följer upp min hälsa vid behov.", type:"yn" },
       { id:19, area:"Fysisk hälsa", text:"Jag är ofta sjuk eller upplever återkommande smärta.", type:"yn", reverse:true },
       { id:20, area:"Fysisk hälsa", text:"Jag är nöjd med min fysiska hälsa i nuläget.", type:"scale" },
-
       { id:21, area:"Relationer", text:"Jag har personer i mitt liv som jag kan lita på.", type:"scale" },
       { id:22, area:"Relationer", text:"Jag upplever att mina relationer ger mig energi snarare än tar energi.", type:"scale" },
       { id:23, area:"Relationer", text:"Jag har en nära vän som jag kan prata öppet med.", type:"yn" },
@@ -73,7 +96,6 @@
       { id:28, area:"Relationer", text:"Jag känner mig ofta ensam.", type:"yn", reverse:true },
       { id:29, area:"Relationer", text:"Jag upplever att jag bidrar positivt till andras liv.", type:"scale" },
       { id:30, area:"Relationer", text:"Jag är nöjd med kvaliteten på mina relationer.", type:"scale" },
-
       { id:31, area:"Sysselsättning", text:"Jag är nöjd med mitt arbete eller min huvudsakliga sysselsättning.", type:"scale" },
       { id:32, area:"Sysselsättning", text:"Jag känner att jag utvecklas i mitt arbete/studier.", type:"scale" },
       { id:33, area:"Sysselsättning", text:"Jag känner mig ofta stressad av mitt arbete eller mina studier.", type:"yn", reverse:true },
@@ -120,21 +142,17 @@
       return {sums, scores};
     }
     function progress(){ return Math.round(((idx+1)/QUESTIONS.length)*100); }
-    function colorForPoints(p){ if(p < 400) return "#ef4444"; if(p >= 700) return "#16a34a"; return "#f59e0b"; }
 
     // ------------------ RENDER ------------------
     function render(){
       if(idx >= QUESTIONS.length){
         const {scores} = summary();
 
-        // totalpoäng 0–1000 (medel% * 10)
         const overallPct = Math.round(
           (scores['Ekonomi'] + scores['Fysisk hälsa'] + scores['Relationer'] + scores['Sysselsättning']) / 4
         );
         const overallPoints = overallPct * 10;
-        const scoreColor = colorForPoints(overallPoints);
 
-        // område med lägst poäng
         const sorted = Object.entries(scores).sort((a,b)=>a[1]-b[1]);
         const lowest = sorted[0];
         const lowestArea = lowest ? lowest[0] : AREAS[0];
@@ -144,15 +162,18 @@
         app.innerHTML = `
           <h1>Ditt resultat</h1>
 
-          <div class="stack" style="align-items:center;justify-content:center">
-            <div class="scoreBox" style="color:${scoreColor}">
-              ${overallPoints} poäng
+          <!-- Översta gradientbar 0–1000 -->
+          <div class="scoreWrap" aria-label="Totalpoäng">
+            <div class="gbar" role="progressbar" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="${overallPoints}">
+              <div class="gfill" style="width:${overallPct}%"></div>
             </div>
-            <div class="muted">0 (sämst) – 1000 (bäst)</div>
+            <div class="scoreBox">${overallPoints} poäng</div>
+            <div class="scoreSub">0 (sämst) – 1000 (bäst)</div>
           </div>
 
           <div class="hr"></div>
 
+          <!-- Områdesstaplar med samma färgtema -->
           <div class="grid">
             ${AREAS.map(a=>`
               <div class="stack">
@@ -164,17 +185,25 @@
 
           <div class="hr"></div>
 
+          <!-- Tydlig CTA till fördjupande test -->
           <div class="stack">
             <strong>Fördjupande test</strong>
             <div class="muted">Lägst resultat: <strong>${lowestArea}</strong> (${lowestVal}%).</div>
-            <a class="btn" href="${targetUrl}">Öppna fördjupande test i ${lowestArea.toLowerCase()}</a>
+            <div class="ctaWrap">
+              <a class="cta" href="${targetUrl}" target="_blank" rel="noopener">
+                Öppna fördjupande test i ${lowestArea.toLowerCase()}
+              </a>
+            </div>
           </div>
 
-          <div class="row" style="margin-top:20px">
+          <div class="hr"></div>
+
+          <div class="btnRow">
             <button class="btn sec" onclick="window.print()">Skriv ut / PDF</button>
             <button class="btn" onclick="location.reload()">Gör om testet</button>
           </div>
         `;
+
         return;
       }
 
