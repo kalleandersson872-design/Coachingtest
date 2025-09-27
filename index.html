@@ -7,7 +7,7 @@
   <style>
     :root{
       --bg:#f7f7f8;--card:#ffffff;--ink:#111;--muted:#6b7280;--line:#e5e7eb;
-      --grad: linear-gradient(90deg,#ef4444 0%, #f59e0b 50%, #16a34a 100%); /* röd→gul→grön */
+      --red:#ef4444;--yellow:#f59e0b;--green:#16a34a;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--ink)}
@@ -33,25 +33,25 @@
     .hr{height:1px;background:var(--line);margin:12px 0}
 
     /* Poängvisning */
-    .scoreWrap{display:grid;gap:8px;align-items:center}
+    .scoreWrap{display:grid;gap:10px;align-items:center}
     .gbar{position:relative;height:16px;border-radius:999px;background:#e5e7eb;overflow:hidden}
-    .gfill{height:100%;width:0;background:var(--grad)}
-    .scoreBox{font-size:36px; /* mindre än tidigare */ font-weight:900;text-align:center;padding:4px 0}
-    .scoreSub{font-size:14px;color:var(--muted);text-align:center}
+    .gfill{height:100%;width:0;background:var(--yellow)}
+    .scoreBox{font-size:36px; font-weight:900;text-align:center;padding:4px 0}
 
-    /* Områdesstaplar med samma färgtema */
+    /* Områdesstaplar (solid färg baserat på % enligt regeln) */
     .bar{height:16px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-    .bar>div{height:100%;background:var(--grad);width:0}
+    .bar>div{height:100%;width:0;background:var(--yellow)}
 
-    /* CTA – mer synlig */
+    /* CTA – vit text på svart */
     .cta{
-      display:inline-block; text-decoration:none; color:#fff; font-weight:800;
-      padding:16px 20px; border-radius:20px; background:var(--grad); border:none;
-      box-shadow:0 10px 20px rgba(245,158,11,.25), 0 2px 6px rgba(0,0,0,.08);
-      transition:transform .05s ease, box-shadow .2s ease; font-size:16px;
+      display:inline-block;text-decoration:none;color:#fff;background:#000;font-weight:800;
+      padding:16px 20px;border-radius:20px;border:1px solid #000;
+      box-shadow:0 2px 10px rgba(0,0,0,.15);
+      transition:transform .05s ease, box-shadow .2s ease, background .2s ease;
+      font-size:16px;
     }
-    .cta:hover{transform:translateY(-1px); box-shadow:0 14px 28px rgba(245,158,11,.35), 0 4px 10px rgba(0,0,0,.1)}
-    .cta:focus{outline:3px solid rgba(17,17,17,.3); outline-offset:3px}
+    .cta:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,.22); background:#111}
+    .cta:focus{outline:3px solid rgba(0,0,0,.3); outline-offset:3px}
     .ctaWrap{display:flex;justify-content:center}
 
     /* Sekundära knappar rad */
@@ -109,7 +109,6 @@
     ];
     const AREAS = ["Ekonomi","Fysisk hälsa","Relationer","Sysselsättning"];
 
-    // --- Länkar till fördjupande tester ---
     const LINKS = {
       "Sysselsättning": "https://kalleandersson872-design.github.io/sysselsattning/",
       "Ekonomi":        "https://kalleandersson872-design.github.io/ekonomi1/",
@@ -123,16 +122,14 @@
     const app = document.getElementById('app');
 
     // ------------------ HELPERS ------------------
+    function bandColor(pct){
+      if(pct < 20) return getComputedStyle(document.documentElement).getPropertyValue('--red') || '#ef4444';
+      if(pct >= 70) return getComputedStyle(document.documentElement).getPropertyValue('--green') || '#16a34a';
+      return getComputedStyle(document.documentElement).getPropertyValue('--yellow') || '#f59e0b';
+    }
     function mapAnswerToScore(q, value){
-      if(q.type === 'scale'){
-        const v = Number(value);
-        return v >= 1 && v <= 5 ? v : 0;
-      }
-      if(q.type === 'yn'){
-        const yes = q.reverse ? 1 : 5;
-        const no  = q.reverse ? 5 : 1;
-        return value === 'Ja' ? yes : value === 'Nej' ? no : 0;
-      }
+      if(q.type === 'scale'){ const v = Number(value); return v>=1 && v<=5 ? v : 0; }
+      if(q.type === 'yn'){ const yes=q.reverse?1:5, no=q.reverse?5:1; return value==='Ja'?yes : value==='Nej'?no : 0; }
       return 0;
     }
     function summary(){
@@ -141,7 +138,7 @@
       const scores = Object.fromEntries(AREAS.map(a=>[a, Math.round((sums[a]/50)*100)]));
       return {sums, scores};
     }
-    function progress(){ return Math.round(((idx+1)/QUESTIONS.length)*100); }
+    const progress = ()=> Math.round(((idx+1)/QUESTIONS.length)*100);
 
     // ------------------ RENDER ------------------
     function render(){
@@ -162,30 +159,29 @@
         app.innerHTML = `
           <h1>Ditt resultat</h1>
 
-          <!-- Översta gradientbar 0–1000 -->
+          <!-- Översta bar 0–1000 med färgband -->
           <div class="scoreWrap" aria-label="Totalpoäng">
             <div class="gbar" role="progressbar" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="${overallPoints}">
-              <div class="gfill" style="width:${overallPct}%"></div>
+              <div class="gfill" id="overallFill" style="width:${overallPct}%"></div>
             </div>
             <div class="scoreBox">${overallPoints} poäng</div>
-            <div class="scoreSub">0 (sämst) – 1000 (bäst)</div>
           </div>
 
           <div class="hr"></div>
 
-          <!-- Områdesstaplar med samma färgtema -->
+          <!-- Områdesstaplar -->
           <div class="grid">
             ${AREAS.map(a=>`
               <div class="stack">
                 <div style="display:flex;justify-content:space-between;align-items:center"><strong>${a}</strong><span>${scores[a]}%</span></div>
-                <div class="bar"><div style="width:${scores[a]}%"></div></div>
+                <div class="bar"><div class="fill" style="width:${scores[a]}%"></div></div>
               </div>
             `).join('')}
           </div>
 
           <div class="hr"></div>
 
-          <!-- Tydlig CTA till fördjupande test -->
+          <!-- CTA -->
           <div class="stack">
             <strong>Fördjupande test</strong>
             <div class="muted">Lägst resultat: <strong>${lowestArea}</strong> (${lowestVal}%).</div>
@@ -203,6 +199,16 @@
             <button class="btn" onclick="location.reload()">Gör om testet</button>
           </div>
         `;
+
+        // Sätt färg på totalbar och varje områdesbar
+        const overallFill = document.getElementById('overallFill');
+        overallFill.style.background = bandColor(overallPct);
+
+        document.querySelectorAll('.bar .fill').forEach((el, i)=>{
+          const area = AREAS[i % AREAS.length]; // mappas i ordning ovan
+          const pct = scores[area];
+          el.style.background = bandColor(pct);
+        });
 
         return;
       }
