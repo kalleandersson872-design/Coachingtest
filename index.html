@@ -13,8 +13,7 @@
     h1{font-size:clamp(20px,3vw,28px);margin:0 0 12px;font-weight:800}
     .muted{color:var(--muted)}
     .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-    .btn{appearance:none;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;cursor:pointer;font-weight:600}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn{appearance:none;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block}
     .btn.sec{background:#fff;color:var(--ink)}
     .pill{border:1px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer;user-select:none}
     .pill.sel{outline:2px solid var(--ink)}
@@ -27,47 +26,16 @@
     .stack{display:grid;gap:12px}
     .bar{height:16px;background:#e5e7eb;border-radius:999px;overflow:hidden}
     .bar>div{height:100%;background:#111}
-    .list{margin:0;padding-left:18px}
-    .list li{margin:6px 0}
     .grid{display:grid;gap:16px}
     @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
     .footnote{font-size:12px;color:var(--muted)}
     .hr{height:1px;background:var(--line);margin:12px 0}
     .scoreBox{font-size:48px;font-weight:900;text-align:center;padding:20px;border-radius:16px}
-    .qrWrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-    .qrImg{width:180px;height:180px;border:1px solid var(--line);border-radius:12px;object-fit:contain;background:#fff}
-    .copy{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background:#f9fafb;border:1px solid var(--line);border-radius:10px;padding:6px 10px}
-
-    /* Modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
-    .modal{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.18);max-width:520px;width:100%;padding:20px}
-    .modal h2{margin:0 0 8px;font-size:20px}
-    .modal .muted{margin-bottom:12px}
-    .modal .actions{justify-content:flex-end;gap:8px}
-
-    /* Kodfält */
-    .codeRow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .codeInput{padding:10px 12px;border:1px solid var(--line);border-radius:10px;min-width:200px}
-    .codeMsg{font-size:12px}
-    .ok{color:#16a34a}
-    .err{color:#b91c1c}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card" id="app"></div>
-  </div>
-
-  <!-- Modal för Swish-bekräftelse -->
-  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <h2 id="modalTitle">Bekräfta betalning</h2>
-      <div class="muted" id="modalText"></div>
-      <div class="actions">
-        <button class="btn sec" id="modalCancel">Avbryt</button>
-        <button class="btn" id="modalOk">Öppna Swish nu</button>
-      </div>
-    </div>
   </div>
 
   <script>
@@ -119,18 +87,12 @@
     ];
     const AREAS = ["Ekonomi","Fysisk hälsa","Relationer","Sysselsättning"];
 
-    // --- KONFIGURATION ---
-    const CONFIG = {
-      priceSEK: 50, // skickas som 50.00 i deeplink/QR
-      swishPayee: "0763044124",
-      apiBase: "https://qol-linker.kalleandersson872.workers.dev",
-      links: {
-        "Sysselsättning": "https://kalleandersson872-design.github.io/sysselsattning/",
-        "Ekonomi":        "https://kalleandersson872-design.github.io/ekonomi1/",
-        "Relationer":     "https://kalleandersson872-design.github.io/relationer/",
-        "Fysisk hälsa":   "https://kalleandersson872-design.github.io/fysisk-halsa-test/",
-      },
-      freeCode: "neabus" // gratis-kod
+    // --- Länkar till fördjupande tester ---
+    const LINKS = {
+      "Sysselsättning": "https://kalleandersson872-design.github.io/sysselsattning/",
+      "Ekonomi":        "https://kalleandersson872-design.github.io/ekonomi1/",
+      "Relationer":     "https://kalleandersson872-design.github.io/relationer/",
+      "Fysisk hälsa":   "https://kalleandersson872-design.github.io/fysisk-halsa-test/",
     };
 
     // ------------------ STATE ------------------
@@ -139,9 +101,6 @@
     const app = document.getElementById('app');
 
     // ------------------ HELPERS ------------------
-    function isMobile(){
-      return /iphone|ipad|ipod|android|windows phone/i.test(navigator.userAgent);
-    }
     function mapAnswerToScore(q, value){
       if(q.type === 'scale'){
         const v = Number(value);
@@ -161,88 +120,7 @@
       return {sums, scores};
     }
     function progress(){ return Math.round(((idx+1)/QUESTIONS.length)*100); }
-
-    function colorForPoints(p){
-      if(p < 400) return "#ef4444";      // röd
-      if(p >= 700) return "#16a34a";     // grön
-      return "#f59e0b";                  // gul
-    }
-
-    function makeRef(area){
-      const rnd = Math.random().toString(36).slice(2,8).toUpperCase();
-      return `FOR${CONFIG.priceSEK}-${area.replace(/[^A-Za-zÅÄÖåäö]/g,'')}-${Date.now()}-${rnd}`;
-    }
-
-    function formatAmount(amount){
-      const n = Number(amount);
-      return n.toFixed(2); // 50.00
-    }
-    function formatAmountText(amount){
-      return formatAmount(amount).replace('.', ',');
-    }
-
-    function swishDeepLink(payee, amount, message){
-      const p = new URLSearchParams({
-        version: "1",
-        payee: String(payee),
-        amount: formatAmount(amount),
-        message: String(message)
-      });
-      return `swish://paymentrequest?${p.toString()}`;
-    }
-    function swishQrImageUrl(payee, amount, message){
-      const deeplink = swishDeepLink(payee, amount, message);
-      const encoded = encodeURIComponent(deeplink);
-      return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encoded}`;
-    }
-
-    async function createAndRedirect(area, ref, paidBtn, errEl){
-      try{
-        if (paidBtn){
-          paidBtn.disabled = true;
-          paidBtn.textContent = "Kontrollerar…";
-        }
-        if (errEl) errEl.style.display = 'none';
-
-        const res = await fetch(`${CONFIG.apiBase}/create-link`,{
-          method:'POST',
-          headers:{'content-type':'application/json'},
-          body: JSON.stringify({ area, ref })
-        });
-        if(!res.ok) throw new Error('Serverfel: ' + res.status);
-        const data = await res.json(); // { url, validForMinutes }
-        window.location.replace(data.url); // direkt vidare
-      }catch(e){
-        if (errEl){
-          errEl.textContent = "Kunde inte skapa länk. Kontrollera att apiBase är korrekt och att Workern är deployad. Detalj: " + (e?.message || e);
-          errEl.style.display = 'block';
-        } else {
-          alert("Kunde inte skapa länk: " + (e?.message || e));
-        }
-        if (paidBtn){
-          paidBtn.disabled = false;
-          paidBtn.textContent = "Jag har betalat";
-        }
-      }
-    }
-
-    // Modal helpers
-    const modalBackdrop = document.getElementById('modalBackdrop');
-    const modalText = document.getElementById('modalText');
-    const modalOk = document.getElementById('modalOk');
-    const modalCancel = document.getElementById('modalCancel');
-    function openModal(html, onOk){
-      modalText.innerHTML = html;
-      modalBackdrop.style.display = 'flex';
-      function cleanup(){
-        modalBackdrop.style.display = 'none';
-        modalOk.onclick = null;
-        modalCancel.onclick = null;
-      }
-      modalOk.onclick = ()=>{ cleanup(); onOk?.(); };
-      modalCancel.onclick = cleanup;
-      modalBackdrop.onclick = (e)=>{ if(e.target === modalBackdrop) cleanup(); };
-    }
+    function colorForPoints(p){ if(p < 400) return "#ef4444"; if(p >= 700) return "#16a34a"; return "#f59e0b"; }
 
     // ------------------ RENDER ------------------
     function render(){
@@ -250,16 +128,18 @@
         const {scores} = summary();
 
         // totalpoäng 0–1000 (medel% * 10)
-        const overallPct = Math.round((scores['Ekonomi'] + scores['Fysisk hälsa'] + scores['Relationer'] + scores['Sysselsättning']) / 4);
+        const overallPct = Math.round(
+          (scores['Ekonomi'] + scores['Fysisk hälsa'] + scores['Relationer'] + scores['Sysselsättning']) / 4
+        );
         const overallPoints = overallPct * 10;
         const scoreColor = colorForPoints(overallPoints);
 
-        // område med lägst poäng (för upsell)
+        // område med lägst poäng
         const sorted = Object.entries(scores).sort((a,b)=>a[1]-b[1]);
         const lowest = sorted[0];
         const lowestArea = lowest ? lowest[0] : AREAS[0];
         const lowestVal  = lowest ? lowest[1] : 0;
-        const ref = makeRef(lowestArea);
+        const targetUrl = LINKS[lowestArea];
 
         app.innerHTML = `
           <h1>Ditt resultat</h1>
@@ -284,114 +164,17 @@
 
           <div class="hr"></div>
 
-          <div class="stack" id="upsell">
+          <div class="stack">
             <strong>Fördjupande test</strong>
-            <div class="muted">Lägst resultat: <strong>${lowestArea}</strong> (${lowestVal}%). Fördjupande test för <strong>${formatAmountText(CONFIG.priceSEK)} kr</strong> via Swish till <strong>${CONFIG.swishPayee}</strong> – eller ange en kod för gratis tillgång.</div>
-
-            <!-- GRATIS-KOD -->
-            <div class="stack" style="margin-top:6px">
-              <div class="codeRow">
-                <input id="freeCodeInput" class="codeInput" type="text" placeholder="Ange kod (t.ex. neabus)" />
-                <button id="freeCodeBtn" class="btn sec">Lös in kod</button>
-                <span id="freeCodeMsg" class="codeMsg muted"></span>
-              </div>
-            </div>
-
-            <!-- Betalning -->
-            <div id="payBox" class="stack" style="margin-top:8px"></div>
-
-            <div class="row">
-              <button id="paidBtn" class="btn sec">Jag har betalat</button>
-            </div>
-
-            <div class="footnote">Efter betalning eller godkänd kod skickas du automatiskt vidare till det fördjupande testet.</div>
-            <div class="footnote" id="errorBox" style="display:none;color:#b91c1c">Ett fel uppstod. Kontrollera internet/inställningar och försök igen.</div>
+            <div class="muted">Lägst resultat: <strong>${lowestArea}</strong> (${lowestVal}%).</div>
+            <a class="btn" href="${targetUrl}">Öppna fördjupande test i ${lowestArea.toLowerCase()}</a>
           </div>
 
           <div class="row" style="margin-top:20px">
-            <button class="btn" onclick="location.reload()">Gör om testet</button>
             <button class="btn sec" onclick="window.print()">Skriv ut / PDF</button>
+            <button class="btn" onclick="location.reload()">Gör om testet</button>
           </div>
         `;
-
-        // Element
-        const payBox = document.getElementById('payBox');
-        const paidBtn = document.getElementById('paidBtn');
-        const errEl = document.getElementById('errorBox');
-        const codeInput = document.getElementById('freeCodeInput');
-        const codeBtn = document.getElementById('freeCodeBtn');
-        const codeMsg = document.getElementById('freeCodeMsg');
-
-        const amountFixed = formatAmount(CONFIG.priceSEK);
-        const amountText = formatAmountText(CONFIG.priceSEK);
-        const deeplink = swishDeepLink(CONFIG.swishPayee, amountFixed, ref);
-
-        // Gratis-kod inlösen
-        codeBtn.addEventListener('click', ()=>{
-          const val = (codeInput.value || "").trim().toLowerCase();
-          if(val === (CONFIG.freeCode || "").toLowerCase()){
-            codeMsg.textContent = "Kod godkänd – du kommer att skickas vidare.";
-            codeMsg.className = "codeMsg ok";
-            // Skapa länk med "FREE" i ref för att kunna särskilja i loggar om du vill
-            createAndRedirect(lowestArea, ref + "-FREE", null, errEl);
-          } else {
-            codeMsg.textContent = "Ogiltig kod.";
-            codeMsg.className = "codeMsg err";
-          }
-        });
-
-        // Bygg betalningsruta beroende på enhet
-        if (isMobile()) {
-          // MOBIL – "Öppna Swish" med bekräftelse-modal
-          payBox.innerHTML = `
-            <div class="row">
-              <div class="muted">Mottagare: <span class="copy">${CONFIG.swishPayee}</span></div>
-              <div class="muted">Belopp: <span class="copy">${amountText} kr</span></div>
-              <div class="muted">Ref: <span class="copy" id="refText">${ref}</span> <button class="btn sec" id="copyRefBtn">Kopiera</button></div>
-            </div>
-            <div class="row">
-              <a id="swishBtn" class="btn" href="#">Öppna Swish</a>
-            </div>
-            <div class="footnote">Om appen inte öppnas automatiskt, öppna Swish manuellt och ange uppgifterna exakt som ovan.</div>
-          `;
-          document.getElementById('copyRefBtn').onclick = ()=>{
-            navigator.clipboard?.writeText(ref);
-          };
-          document.getElementById('swishBtn').onclick = (e)=>{
-            e.preventDefault();
-            openModal(
-              `Du kommer att öppna Swish med följande uppgifter:<br><br>
-               <strong>Belopp:</strong> ${amountText} kr<br>
-               <strong>Mottagare:</strong> ${CONFIG.swishPayee}<br>
-               <strong>Referens:</strong> ${ref}<br><br>
-               Bekräfta för att fortsätta.`,
-              ()=>{ try{ window.location.href = deeplink; }catch{} }
-            );
-          };
-        } else {
-          // DATOR – QR som kodar deeplinken (innehåller payee + amount)
-          const qrUrl = swishQrImageUrl(CONFIG.swishPayee, amountFixed, ref);
-          payBox.innerHTML = `
-            <div class="qrWrap">
-              <img class="qrImg" src="${qrUrl}" alt="Swish QR-kod" />
-              <div class="stack">
-                <div class="muted">Skanna QR med mobilen. Betalningen öppnas i Swish med rätt mottagare och belopp.</div>
-                <div class="row"><div class="muted">Mottagare:</div> <div class="copy">${CONFIG.swishPayee}</div></div>
-                <div class="row"><div class="muted">Belopp:</div>    <div class="copy">${amountText} kr</div></div>
-                <div class="row"><div class="muted">Ref:</div>       <div class="copy" id="refText">${ref}</div> <button class="btn sec" id="copyRefBtn">Kopiera</button></div>
-              </div>
-            </div>
-          `;
-          document.getElementById('copyRefBtn').onclick = ()=>{
-            navigator.clipboard?.writeText(ref);
-          };
-        }
-
-        // "Jag har betalat" -> skapa länk & omdirigera direkt
-        paidBtn.addEventListener('click', ()=>{
-          createAndRedirect(lowestArea, ref, paidBtn, errEl);
-        });
-
         return;
       }
 
