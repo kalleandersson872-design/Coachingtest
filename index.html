@@ -7,7 +7,7 @@
   <style>
     :root{
       --bg:#f7f7f8;--card:#ffffff;--ink:#111;--muted:#6b7280;--line:#e5e7eb;
-      --red:#ef4444;--yellow:#f59e0b;--green:#16a34a;
+      --black:#000;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--ink)}
@@ -35,12 +35,12 @@
     /* Poängvisning */
     .scoreWrap{display:grid;gap:10px;align-items:center}
     .gbar{position:relative;height:16px;border-radius:999px;background:#e5e7eb;overflow:hidden}
-    .gfill{height:100%;width:0;background:var(--yellow)}
-    .scoreBox{font-size:36px; font-weight:900;text-align:center;padding:4px 0}
+    .gfill{height:100%;width:0;background:var(--black)}
+    .scoreBox{font-size:36px;font-weight:900;text-align:center;padding:4px 0;color:var(--black)}
 
-    /* Områdesstaplar (solid färg baserat på % enligt regeln) */
+    /* Områdesstaplar */
     .bar{height:16px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-    .bar>div{height:100%;width:0;background:var(--yellow)}
+    .bar>div{height:100%;width:0;background:var(--black)}
 
     /* CTA – vit text på svart */
     .cta{
@@ -64,7 +64,6 @@
   </div>
 
   <script>
-    // ------------------ DATA ------------------
     const QUESTIONS = [
       { id:1, area:"Ekonomi", text:"Jag har en tydlig överblick över mina inkomster och utgifter.", type:"scale" },
       { id:2, area:"Ekonomi", text:"Jag har en buffert/sparande som gör att jag känner mig trygg.", type:"scale" },
@@ -116,17 +115,10 @@
       "Fysisk hälsa":   "https://kalleandersson872-design.github.io/fysisk-halsa-test/",
     };
 
-    // ------------------ STATE ------------------
     let idx = 0;
     const answers = {};
     const app = document.getElementById('app');
 
-    // ------------------ HELPERS ------------------
-    function bandColor(pct){
-      if(pct < 20) return getComputedStyle(document.documentElement).getPropertyValue('--red') || '#ef4444';
-      if(pct >= 70) return getComputedStyle(document.documentElement).getPropertyValue('--green') || '#16a34a';
-      return getComputedStyle(document.documentElement).getPropertyValue('--yellow') || '#f59e0b';
-    }
     function mapAnswerToScore(q, value){
       if(q.type === 'scale'){ const v = Number(value); return v>=1 && v<=5 ? v : 0; }
       if(q.type === 'yn'){ const yes=q.reverse?1:5, no=q.reverse?5:1; return value==='Ja'?yes : value==='Nej'?no : 0; }
@@ -140,11 +132,9 @@
     }
     const progress = ()=> Math.round(((idx+1)/QUESTIONS.length)*100);
 
-    // ------------------ RENDER ------------------
     function render(){
       if(idx >= QUESTIONS.length){
         const {scores} = summary();
-
         const overallPct = Math.round(
           (scores['Ekonomi'] + scores['Fysisk hälsa'] + scores['Relationer'] + scores['Sysselsättning']) / 4
         );
@@ -158,30 +148,20 @@
 
         app.innerHTML = `
           <h1>Ditt resultat</h1>
-
-          <!-- Översta bar 0–1000 med färgband -->
-          <div class="scoreWrap" aria-label="Totalpoäng">
-            <div class="gbar" role="progressbar" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="${overallPoints}">
-              <div class="gfill" id="overallFill" style="width:${overallPct}%"></div>
-            </div>
+          <div class="scoreWrap">
+            <div class="gbar"><div class="gfill" style="width:${overallPct}%"></div></div>
             <div class="scoreBox">${overallPoints} poäng</div>
           </div>
-
           <div class="hr"></div>
-
-          <!-- Områdesstaplar -->
           <div class="grid">
             ${AREAS.map(a=>`
               <div class="stack">
                 <div style="display:flex;justify-content:space-between;align-items:center"><strong>${a}</strong><span>${scores[a]}%</span></div>
-                <div class="bar"><div class="fill" style="width:${scores[a]}%"></div></div>
+                <div class="bar"><div style="width:${scores[a]}%"></div></div>
               </div>
             `).join('')}
           </div>
-
           <div class="hr"></div>
-
-          <!-- CTA -->
           <div class="stack">
             <strong>Fördjupande test</strong>
             <div class="muted">Lägst resultat: <strong>${lowestArea}</strong> (${lowestVal}%).</div>
@@ -191,29 +171,15 @@
               </a>
             </div>
           </div>
-
           <div class="hr"></div>
-
           <div class="btnRow">
             <button class="btn sec" onclick="window.print()">Skriv ut / PDF</button>
             <button class="btn" onclick="location.reload()">Gör om testet</button>
           </div>
         `;
-
-        // Sätt färg på totalbar och varje områdesbar
-        const overallFill = document.getElementById('overallFill');
-        overallFill.style.background = bandColor(overallPct);
-
-        document.querySelectorAll('.bar .fill').forEach((el, i)=>{
-          const area = AREAS[i % AREAS.length]; // mappas i ordning ovan
-          const pct = scores[area];
-          el.style.background = bandColor(pct);
-        });
-
         return;
       }
 
-      // --- FRÅGEVY ---
       const q = QUESTIONS[idx];
       const val = answers[q.id];
       const pct = progress();
@@ -223,14 +189,12 @@
           <h1>Coachingtest – Livskvalitet</h1>
           <div class="muted">Fråga ${idx+1} av ${QUESTIONS.length} · ${pct}%</div>
         </div>
-        <div class="prog" aria-hidden="true"><div style="width:${pct}%"></div></div>
-
+        <div class="prog"><div style="width:${pct}%"></div></div>
         <div class="stack" style="margin-top:16px">
           <div class="qarea">${q.area}</div>
           <div class="qtext">${q.text}</div>
           <div class="row" id="opts"></div>
         </div>
-
         <div class="actions">
           <button class="btn sec" ${idx===0?'disabled':''} id="backBtn">Tillbaka</button>
           <button class="btn" ${val?"":"disabled"} id="nextBtn">${idx<QUESTIONS.length-1?"Nästa":"Visa resultat"}</button>
@@ -261,7 +225,6 @@
       document.getElementById('nextBtn').onclick = ()=>{ if(answers[q.id]!==undefined){ idx++; render(); }};
     }
 
-    // Init
     render();
   </script>
 </body>
