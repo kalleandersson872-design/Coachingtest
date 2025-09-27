@@ -6,7 +6,7 @@
   <title>Coachingtest – Livskvalitet</title>
   <style>
     :root{
-      --bg:#f7f7f8;--card:#ffffff;--ink:#111;--muted:#6b7280;--line:#e5e7eb;
+      --bg:#f7f7f8;--card:#ffffff;--ink:#111;--muted:#6b7280;--line:#000;
       --black:#000;
     }
     *{box-sizing:border-box}
@@ -21,7 +21,7 @@
     .pill{border:1px solid var(--line);border-radius:12px;padding:10px 14px;cursor:pointer;user-select:none}
     .pill.sel{outline:2px solid var(--ink)}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .prog{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+    .prog{height:10px;background:#000;border-radius:999px;overflow:hidden}
     .prog>div{height:100%;background:#111;width:0}
     .qarea{font-size:14px;color:var(--muted);margin-bottom:6px}
     .qtext{font-size:18px;font-weight:600;margin-bottom:12px}
@@ -34,12 +34,12 @@
 
     /* Poängvisning */
     .scoreWrap{display:grid;gap:10px;align-items:center}
-    .gbar{position:relative;height:16px;border-radius:999px;background:#e5e7eb;overflow:hidden}
+    .gbar{position:relative;height:16px;border-radius:999px;background:#000;overflow:hidden}
     .gfill{height:100%;width:0;background:var(--black)}
     .scoreBox{font-size:36px;font-weight:900;text-align:center;padding:4px 0;color:var(--black)}
 
     /* Områdesstaplar */
-    .bar{height:16px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+    .bar{height:16px;background:#000;border-radius:999px;overflow:hidden}
     .bar>div{height:100%;width:0;background:var(--black)}
 
     /* CTA – vit text på svart */
