@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coachingtest – Livskvalitet</title>
+
   <style>
     :root{
       --bg:#f7f7f8;
@@ -39,9 +40,25 @@
     }
 
     h1{
-      font-size:clamp(20px,3vw,28px);
+      font-size:clamp(22px,3vw,30px);
       margin:0 0 12px;
       font-weight:800;
+    }
+
+    h2{
+      font-size:20px;
+      margin:0;
+    }
+
+    p{
+      margin:0;
+      line-height:1.6;
+    }
+
+    ul{
+      margin:0;
+      padding-left:22px;
+      line-height:1.7;
     }
 
     .muted{color:var(--muted)}
@@ -153,6 +170,13 @@
       height:1px;
       background:var(--line);
       margin:16px 0;
+    }
+
+    .infoBox{
+      background:#f9fafb;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:16px;
     }
 
     .scoreWrap{
@@ -295,7 +319,9 @@
       "Fysisk hälsa": "https://kalleandersson872-design.github.io/fysisk-halsa-test/"
     };
 
+    let started = false;
     let idx = 0;
+
     const answers = {};
     const app = document.getElementById('app');
 
@@ -349,6 +375,63 @@
     }
 
     function render(){
+      if(!started){
+        app.innerHTML = `
+          <h1>Coachingtest – Livskvalitet</h1>
+
+          <div class="stack">
+            <p class="muted">
+              Detta test ger en enkel överblick över din upplevda livskvalitet
+              inom fyra områden: ekonomi, fysisk hälsa, relationer och sysselsättning.
+            </p>
+
+            <div class="infoBox stack">
+              <h2>Så fungerar testet</h2>
+              <p class="muted">
+                Testet består av 40 frågor. Du svarar med alternativ 1–5 eller Ja/Nej.
+                Resultatet visas som staplar för respektive område. Testet är inte en
+                medicinsk, psykologisk eller ekonomisk bedömning, utan ett reflektionsstöd.
+              </p>
+            </div>
+
+            <div class="infoBox stack">
+              <h2>Efter genomfört test kan du</h2>
+              <ul class="muted">
+                <li>se ditt resultat i form av tydliga staplar,</li>
+                <li>skriva ut eller spara resultatet som PDF,</li>
+                <li>göra om testet,</li>
+                <li>kontakta mig för ett fördjupande test och ett coachande samtal.</li>
+              </ul>
+            </div>
+
+            <div class="infoBox stack">
+              <h2>Anonymitet och GDPR</h2>
+              <p class="muted">
+                Testet är anonymt och gratis. Inga personuppgifter behöver anges för att
+                genomföra testet. Inga svar skickas vidare, lagras eller behandlas av mig
+                via detta test. Testet är utformat för att följa svensk lagstiftning och
+                EU:s dataskyddsförordning, GDPR.
+              </p>
+            </div>
+
+            <p class="muted">
+              Genom att starta testet bekräftar du att du har tagit del av informationen ovan.
+            </p>
+
+            <button class="btn" id="startBtn">
+              Starta testet
+            </button>
+          </div>
+        `;
+
+        document.getElementById('startBtn').onclick = () => {
+          started = true;
+          render();
+        };
+
+        return;
+      }
+
       if(idx >= QUESTIONS.length){
         const {scores} = summary();
 
@@ -395,9 +478,10 @@
           <div class="hr"></div>
 
           <div class="stack">
-            <strong>Fördjupande test</strong>
+            <strong>Fördjupande test och samtal</strong>
             <div class="muted">
               Lägst resultat: <strong>${lowestArea}</strong> (${lowestVal}%).
+              Du kan kontakta mig för ett fördjupande test och ett coachande samtal.
             </div>
 
             <input
@@ -514,7 +598,7 @@
     }
 
     document.addEventListener('keydown', function(e){
-      if(idx >= QUESTIONS.length){
+      if(!started || idx >= QUESTIONS.length){
         return;
       }
 
