@@ -1,353 +1,350 @@
 <!doctype html>
 <html lang="sv">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Coachingtest – Livskvalitet</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Coachingtest – Livskvalitet</title>
 
-  <style>
-    :root{
-      --bg:#f7f7f8;
-      --card:#ffffff;
-      --ink:#111;
-      --muted:#6b7280;
-      --line:#e5e7eb;
-      --green:#16a34a;
-      --green-dark:#15803d;
-    }
+<style>
+:root{
+  --bg:#f7f7f8;
+  --card:#ffffff;
+  --ink:#111;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --green:#16a34a;
+  --green-dark:#15803d;
+}
 
-    *{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
 
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-      background:var(--bg);
-      color:var(--ink);
-    }
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+}
 
-    .wrap{
-      max-width:900px;
-      margin:0 auto;
-      padding:24px;
-    }
+.wrap{
+  max-width:900px;
+  margin:0 auto;
+  padding:24px;
+}
 
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:16px;
-      box-shadow:0 6px 24px rgba(0,0,0,.06);
-      padding:24px;
-    }
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 6px 24px rgba(0,0,0,.06);
+}
 
-    h1{
-      font-size:clamp(22px,3vw,30px);
-      margin:0 0 12px;
-      font-weight:800;
-    }
+h1{
+  margin:0 0 12px;
+  font-size:30px;
+  font-weight:800;
+}
 
-    h2{
-      font-size:20px;
-      margin:0;
-    }
+h2{
+  margin:0;
+  font-size:20px;
+}
 
-    p{
-      margin:0;
-      line-height:1.6;
-    }
+p{
+  margin:0;
+  line-height:1.6;
+}
 
-    ul{
-      margin:0;
-      padding-left:22px;
-      line-height:1.7;
-    }
+ul{
+  margin:0;
+  padding-left:20px;
+  line-height:1.7;
+}
 
-    .muted{color:var(--muted)}
+.stack{
+  display:grid;
+  gap:14px;
+}
 
-    .row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+.row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
 
-    .btn{
-      appearance:none;
-      border:1px solid var(--ink);
-      background:var(--ink);
-      color:#fff;
-      padding:10px 16px;
-      border-radius:12px;
-      cursor:pointer;
-      font-weight:600;
-      text-decoration:none;
-      display:inline-block;
-    }
+.grid{
+  display:grid;
+  gap:18px;
+}
 
-    .btn.sec{
-      background:#fff;
-      color:var(--ink);
-    }
+@media(min-width:720px){
+  .grid{
+    grid-template-columns:1fr 1fr;
+  }
+}
 
-    .btn:disabled{
-      opacity:.4;
-      cursor:not-allowed;
-    }
+.infoBox{
+  border:1px solid var(--line);
+  background:#f9fafb;
+  border-radius:16px;
+  padding:18px;
+}
 
-    .pill{
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:10px 14px;
-      cursor:pointer;
-      user-select:none;
-      background:#fff;
-      transition:.15s;
-    }
+.muted{
+  color:var(--muted);
+}
 
-    .pill:hover{
-      background:#f3f4f6;
-    }
+.hr{
+  height:1px;
+  background:var(--line);
+  margin:18px 0;
+}
 
-    .pill.sel{
-      outline:2px solid var(--ink);
-      font-weight:800;
-    }
+.btn{
+  appearance:none;
+  border:none;
+  background:#111;
+  color:#fff;
+  padding:12px 18px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+}
 
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
+.btn.sec{
+  background:#fff;
+  color:#111;
+  border:1px solid var(--line);
+}
 
-    .prog{
-      height:10px;
-      background:#e5e7eb;
-      border-radius:999px;
-      overflow:hidden;
-    }
+.btn:disabled{
+  opacity:.4;
+  cursor:not-allowed;
+}
 
-    .prog>div{
-      height:100%;
-      background:#000;
-      width:0;
-    }
+.pill{
+  border:1px solid var(--line);
+  padding:12px 16px;
+  border-radius:12px;
+  background:#fff;
+  cursor:pointer;
+  user-select:none;
+}
 
-    .qarea{
-      font-size:14px;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
+.pill.sel{
+  outline:2px solid #111;
+  font-weight:800;
+}
 
-    .qtext{
-      font-size:18px;
-      font-weight:600;
-      margin-bottom:12px;
-    }
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+}
 
-    .actions{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-top:16px;
-    }
+.prog{
+  height:10px;
+  background:#e5e7eb;
+  border-radius:999px;
+  overflow:hidden;
+}
 
-    .stack{
-      display:grid;
-      gap:12px;
-    }
+.prog>div{
+  height:100%;
+  background:#111;
+}
 
-    .grid{
-      display:grid;
-      gap:16px;
-    }
+.qarea{
+  font-size:14px;
+  color:var(--muted);
+}
 
-    @media(min-width:720px){
-      .grid{
-        grid-template-columns:1fr 1fr;
-      }
-    }
+.qtext{
+  font-size:20px;
+  font-weight:700;
+}
 
-    .footnote{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:12px;
-    }
+.actions{
+  display:flex;
+  justify-content:space-between;
+  margin-top:18px;
+}
 
-    .hr{
-      height:1px;
-      background:var(--line);
-      margin:16px 0;
-    }
+.bar{
+  height:18px;
+  background:#e5e7eb;
+  border-radius:999px;
+  overflow:hidden;
+}
 
-    .infoBox{
-      background:#f9fafb;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:16px;
-    }
+.bar>div{
+  height:100%;
+  background:var(--green);
+}
 
-    .gbar{
-      position:relative;
-      height:18px;
-      border-radius:999px;
-      background:#e5e7eb;
-      overflow:hidden;
-    }
+.swishBox{
+  text-align:center;
+  border:2px dashed #d1d5db;
+  border-radius:18px;
+  padding:24px;
+  background:#fff;
+}
 
-    .gfill{
-      height:100%;
-      width:0;
-      background:var(--green);
-    }
+.swishNumber{
+  font-size:28px;
+  font-weight:900;
+  color:var(--green);
+}
 
-    .bar{
-      height:16px;
-      background:#e5e7eb;
-      border-radius:999px;
-      overflow:hidden;
-    }
+.price{
+  font-size:38px;
+  font-weight:900;
+  color:var(--green);
+}
 
-    .bar>div{
-      height:100%;
-      width:0;
-      background:var(--green);
-    }
+.qr{
+  width:100%;
+  max-width:360px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  justify-self:center;
+}
 
-    .cta{
-      display:inline-block;
-      text-decoration:none;
-      color:#fff;
-      background:var(--green);
-      font-weight:800;
-      padding:16px 20px;
-      border-radius:20px;
-      border:1px solid var(--green);
-      box-shadow:0 2px 10px rgba(0,0,0,.15);
-      transition:transform .05s ease, box-shadow .2s ease, background .2s ease;
-      font-size:16px;
-      cursor:pointer;
-      text-align:center;
-    }
+.cta{
+  display:inline-block;
+  background:var(--green);
+  color:#fff;
+  border:none;
+  border-radius:16px;
+  padding:16px 22px;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+}
 
-    .cta:hover{
-      transform:translateY(-1px);
-      box-shadow:0 6px 16px rgba(0,0,0,.22);
-      background:var(--green-dark);
-    }
+.cta:hover{
+  background:var(--green-dark);
+}
 
-    .btnRow{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      justify-content:center;
-    }
+.codeInput{
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #d1d5db;
+  font-size:16px;
+  width:100%;
+  max-width:360px;
+  justify-self:center;
+}
 
-    .swishBox{
-      text-align:center;
-      padding:20px;
-      border:2px dashed #d1d5db;
-      border-radius:16px;
-      background:#fff;
-    }
-
-    .swishNumber{
-      font-size:24px;
-      font-weight:900;
-      color:var(--green);
-    }
-
-    .price{
-      font-size:34px;
-      font-weight:900;
-      color:var(--green);
-    }
-
-    .qr{
-      width:100%;
-      max-width:360px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      justify-self:center;
-    }
-  </style>
+.footnote{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:10px;
+}
+</style>
 </head>
 
 <body>
+
 <div class="wrap">
   <div class="card" id="app"></div>
 </div>
 
 <script>
+
 const QUESTIONS = [
-  { id:1, area:"Ekonomi", text:"Jag har en tydlig överblick över mina inkomster och utgifter.", type:"scale" },
-  { id:2, area:"Ekonomi", text:"Jag har en buffert/sparande som gör att jag känner mig trygg.", type:"scale" },
-  { id:3, area:"Ekonomi", text:"Jag oroar mig ofta för pengar.", type:"yn", reverse:true },
-  { id:4, area:"Ekonomi", text:"Jag upplever att min ekonomiska situation är stabil.", type:"scale" },
-  { id:5, area:"Ekonomi", text:"Jag kan betala mina räkningar i tid varje månad.", type:"yn" },
-  { id:6, area:"Ekonomi", text:"Jag har kontroll över eventuella skulder.", type:"scale" },
-  { id:7, area:"Ekonomi", text:"Jag har råd med sådant som ger mig livskvalitet, till exempel resor eller fritid.", type:"scale" },
-  { id:8, area:"Ekonomi", text:"Jag har en långsiktig plan för min ekonomi.", type:"yn" },
-  { id:9, area:"Ekonomi", text:"Min ekonomi skapar stress i mitt liv.", type:"yn", reverse:true },
-  { id:10, area:"Ekonomi", text:"Jag känner mig nöjd med min ekonomiska situation just nu.", type:"scale" },
 
-  { id:11, area:"Fysisk hälsa", text:"Jag äter en balanserad och näringsrik kost.", type:"scale" },
-  { id:12, area:"Fysisk hälsa", text:"Jag tränar regelbundet, minst två gånger i veckan.", type:"yn" },
-  { id:13, area:"Fysisk hälsa", text:"Jag känner mig pigg och energifylld under dagarna.", type:"scale" },
-  { id:14, area:"Fysisk hälsa", text:"Jag får tillräckligt med sömn av god kvalitet.", type:"scale" },
-  { id:15, area:"Fysisk hälsa", text:"Jag röker, snusar eller använder andra beroendeframkallande substanser.", type:"yn", reverse:true },
-  { id:16, area:"Fysisk hälsa", text:"Jag upplever att min kropp fungerar bra i vardagen.", type:"scale" },
-  { id:17, area:"Fysisk hälsa", text:"Jag hanterar stress på ett hälsosamt sätt.", type:"scale" },
-  { id:18, area:"Fysisk hälsa", text:"Jag går på hälsokontroller eller följer upp min hälsa vid behov.", type:"yn" },
-  { id:19, area:"Fysisk hälsa", text:"Jag är ofta sjuk eller upplever återkommande smärta.", type:"yn", reverse:true },
-  { id:20, area:"Fysisk hälsa", text:"Jag är nöjd med min fysiska hälsa i nuläget.", type:"scale" },
+{ id:1, area:"Ekonomi", text:"Jag har en tydlig överblick över mina inkomster och utgifter.", type:"scale" },
+{ id:2, area:"Ekonomi", text:"Jag har en buffert eller sparande som gör att jag känner mig trygg.", type:"scale" },
+{ id:3, area:"Ekonomi", text:"Jag oroar mig ofta för pengar.", type:"yn", reverse:true },
+{ id:4, area:"Ekonomi", text:"Jag upplever att min ekonomiska situation är stabil.", type:"scale" },
+{ id:5, area:"Ekonomi", text:"Jag kan betala mina räkningar i tid varje månad.", type:"yn" },
+{ id:6, area:"Ekonomi", text:"Jag har kontroll över eventuella skulder.", type:"scale" },
+{ id:7, area:"Ekonomi", text:"Jag har råd med sådant som ger mig livskvalitet.", type:"scale" },
+{ id:8, area:"Ekonomi", text:"Jag har en långsiktig plan för min ekonomi.", type:"yn" },
+{ id:9, area:"Ekonomi", text:"Min ekonomi skapar stress i mitt liv.", type:"yn", reverse:true },
+{ id:10, area:"Ekonomi", text:"Jag känner mig nöjd med min ekonomiska situation just nu.", type:"scale" },
 
-  { id:21, area:"Relationer", text:"Jag har personer i mitt liv som jag kan lita på.", type:"scale" },
-  { id:22, area:"Relationer", text:"Jag upplever att mina relationer ger mig energi snarare än tar energi.", type:"scale" },
-  { id:23, area:"Relationer", text:"Jag har en nära vän som jag kan prata öppet med.", type:"yn" },
-  { id:24, area:"Relationer", text:"Jag känner mig uppskattad av människor runt mig.", type:"scale" },
-  { id:25, area:"Relationer", text:"Jag har konflikter som påverkar mig negativt i vardagen.", type:"yn", reverse:true },
-  { id:26, area:"Relationer", text:"Jag upplever att min familj eller partner stöttar mig.", type:"scale" },
-  { id:27, area:"Relationer", text:"Jag är nöjd med mitt sociala liv, till exempel antal vänner, umgänge och gemenskap.", type:"scale" },
-  { id:28, area:"Relationer", text:"Jag känner mig ofta ensam.", type:"yn", reverse:true },
-  { id:29, area:"Relationer", text:"Jag upplever att jag bidrar positivt till andras liv.", type:"scale" },
-  { id:30, area:"Relationer", text:"Jag är nöjd med kvaliteten på mina relationer.", type:"scale" },
+{ id:11, area:"Fysisk hälsa", text:"Jag äter en balanserad och näringsrik kost.", type:"scale" },
+{ id:12, area:"Fysisk hälsa", text:"Jag tränar regelbundet minst två gånger i veckan.", type:"yn" },
+{ id:13, area:"Fysisk hälsa", text:"Jag känner mig pigg och energifylld under dagarna.", type:"scale" },
+{ id:14, area:"Fysisk hälsa", text:"Jag får tillräckligt med sömn av god kvalitet.", type:"scale" },
+{ id:15, area:"Fysisk hälsa", text:"Jag röker, snusar eller använder andra beroendeframkallande substanser.", type:"yn", reverse:true },
+{ id:16, area:"Fysisk hälsa", text:"Jag upplever att min kropp fungerar bra i vardagen.", type:"scale" },
+{ id:17, area:"Fysisk hälsa", text:"Jag hanterar stress på ett hälsosamt sätt.", type:"scale" },
+{ id:18, area:"Fysisk hälsa", text:"Jag går på hälsokontroller eller följer upp min hälsa vid behov.", type:"yn" },
+{ id:19, area:"Fysisk hälsa", text:"Jag är ofta sjuk eller upplever återkommande smärta.", type:"yn", reverse:true },
+{ id:20, area:"Fysisk hälsa", text:"Jag är nöjd med min fysiska hälsa i nuläget.", type:"scale" },
 
-  { id:31, area:"Sysselsättning", text:"Jag är nöjd med mitt arbete eller min huvudsakliga sysselsättning.", type:"scale" },
-  { id:32, area:"Sysselsättning", text:"Jag känner att jag utvecklas i mitt arbete eller mina studier.", type:"scale" },
-  { id:33, area:"Sysselsättning", text:"Jag känner mig ofta stressad av mitt arbete eller mina studier.", type:"yn", reverse:true },
-  { id:34, area:"Sysselsättning", text:"Jag tycker att min sysselsättning känns meningsfull.", type:"scale" },
-  { id:35, area:"Sysselsättning", text:"Jag upplever balans mellan arbete eller studier och fritid.", type:"scale" },
-  { id:36, area:"Sysselsättning", text:"Jag har en tydlig plan för min karriär eller framtida mål.", type:"yn" },
-  { id:37, area:"Sysselsättning", text:"Jag känner att mina styrkor och förmågor kommer till nytta i det jag gör.", type:"scale" },
-  { id:38, area:"Sysselsättning", text:"Jag har en arbetsmiljö som är hälsosam och trivsam.", type:"scale" },
-  { id:39, area:"Sysselsättning", text:"Jag känner mig uppskattad av kollegor, medstudenter eller arbetsgivare.", type:"scale" },
-  { id:40, area:"Sysselsättning", text:"Jag skulle vilja förändra min nuvarande sysselsättning.", type:"yn", reverse:true }
+{ id:21, area:"Relationer", text:"Jag har personer i mitt liv som jag kan lita på.", type:"scale" },
+{ id:22, area:"Relationer", text:"Jag upplever att mina relationer ger mig energi snarare än tar energi.", type:"scale" },
+{ id:23, area:"Relationer", text:"Jag har en nära vän som jag kan prata öppet med.", type:"yn" },
+{ id:24, area:"Relationer", text:"Jag känner mig uppskattad av människor runt mig.", type:"scale" },
+{ id:25, area:"Relationer", text:"Jag har konflikter som påverkar mig negativt i vardagen.", type:"yn", reverse:true },
+{ id:26, area:"Relationer", text:"Jag upplever att min familj eller partner stöttar mig.", type:"scale" },
+{ id:27, area:"Relationer", text:"Jag är nöjd med mitt sociala liv.", type:"scale" },
+{ id:28, area:"Relationer", text:"Jag känner mig ofta ensam.", type:"yn", reverse:true },
+{ id:29, area:"Relationer", text:"Jag upplever att jag bidrar positivt till andras liv.", type:"scale" },
+{ id:30, area:"Relationer", text:"Jag är nöjd med kvaliteten på mina relationer.", type:"scale" },
+
+{ id:31, area:"Sysselsättning", text:"Jag är nöjd med mitt arbete eller min huvudsakliga sysselsättning.", type:"scale" },
+{ id:32, area:"Sysselsättning", text:"Jag känner att jag utvecklas i arbete eller studier.", type:"scale" },
+{ id:33, area:"Sysselsättning", text:"Jag känner mig ofta stressad av arbete eller studier.", type:"yn", reverse:true },
+{ id:34, area:"Sysselsättning", text:"Jag tycker att min sysselsättning känns meningsfull.", type:"scale" },
+{ id:35, area:"Sysselsättning", text:"Jag upplever balans mellan arbete och fritid.", type:"scale" },
+{ id:36, area:"Sysselsättning", text:"Jag har en tydlig plan för min framtid.", type:"yn" },
+{ id:37, area:"Sysselsättning", text:"Jag känner att mina styrkor kommer till nytta.", type:"scale" },
+{ id:38, area:"Sysselsättning", text:"Jag har en arbetsmiljö som känns hälsosam.", type:"scale" },
+{ id:39, area:"Sysselsättning", text:"Jag känner mig uppskattad av kollegor eller arbetsgivare.", type:"scale" },
+{ id:40, area:"Sysselsättning", text:"Jag skulle vilja förändra min nuvarande sysselsättning.", type:"yn", reverse:true }
+
 ];
 
-const AREAS = ["Ekonomi","Fysisk hälsa","Relationer","Sysselsättning"];
+const AREAS = [
+  "Ekonomi",
+  "Fysisk hälsa",
+  "Relationer",
+  "Sysselsättning"
+];
+
+const LINKS = {
+  "Sysselsättning":"https://kalleandersson872-design.github.io/sysselsattning/",
+  "Ekonomi":"https://kalleandersson872-design.github.io/ekonomi1/",
+  "Relationer":"https://kalleandersson872-design.github.io/relationer/",
+  "Fysisk hälsa":"https://kalleandersson872-design.github.io/fysisk-halsa-test/"
+};
 
 let started = false;
 let idx = 0;
+
 const answers = {};
 const app = document.getElementById("app");
 
 function mapAnswerToScore(q, value){
+
   if(q.type === "scale"){
-    const v = Number(value);
-    return v >= 1 && v <= 5 ? v : 0;
+    return Number(value);
   }
 
   if(q.type === "yn"){
+
     const yes = q.reverse ? 1 : 5;
     const no = q.reverse ? 5 : 1;
-    return value === "Ja" ? yes : value === "Nej" ? no : 0;
+
+    return value === "Ja" ? yes : no;
   }
 
   return 0;
 }
 
 function summary(){
-  const sums = Object.fromEntries(AREAS.map(a => [a,0]));
+
+  const sums = Object.fromEntries(
+    AREAS.map(a => [a,0])
+  );
 
   QUESTIONS.forEach(q => {
     sums[q.area] += mapAnswerToScore(q, answers[q.id]);
@@ -356,7 +353,11 @@ function summary(){
   const scores = Object.fromEntries(
     AREAS.map(a => [
       a,
-      Math.round((sums[a] / (QUESTIONS.filter(q => q.area === a).length * 5)) * 100)
+      Math.round(
+        (sums[a] / (
+          QUESTIONS.filter(q => q.area === a).length * 5
+        )) * 100
+      )
     ])
   );
 
@@ -368,6 +369,7 @@ function progress(){
 }
 
 function goNext(){
+
   const q = QUESTIONS[idx];
 
   if(q && answers[q.id] !== undefined){
@@ -377,6 +379,7 @@ function goNext(){
 }
 
 function goBack(){
+
   if(idx > 0){
     idx--;
     render();
@@ -384,48 +387,66 @@ function goBack(){
 }
 
 function render(){
+
   if(!started){
+
     app.innerHTML = `
+
       <h1>Coachingtest – Livskvalitet</h1>
 
       <div class="stack">
+
         <p class="muted">
-          Testet ger en överblick över din upplevda livskvalitet inom ekonomi,
-          fysisk hälsa, relationer och sysselsättning.
+          Testet ger en överblick över din upplevda livskvalitet inom:
+          ekonomi, fysisk hälsa, relationer och sysselsättning.
         </p>
 
         <div class="infoBox stack">
+
           <h2>Så fungerar testet</h2>
+
           <p class="muted">
-            Testet består av 40 frågor. Du svarar med 1–5 eller Ja/Nej.
-            När testet är klart visas resultatet som staplar.
+            Testet består av 40 frågor.
+            Du svarar med 1–5 eller Ja/Nej.
+            Resultatet visas som staplar efter avslutat test.
           </p>
+
         </div>
 
         <div class="infoBox stack">
+
           <h2>Efter genomfört test kan du</h2>
+
           <ul class="muted">
             <li>se ditt resultat,</li>
-            <li>skriva ut eller spara resultatet som PDF,</li>
+            <li>skriva ut resultatet som PDF,</li>
             <li>göra om testet,</li>
             <li>köpa ett fördjupande test för 19 kr via Swish.</li>
           </ul>
+
         </div>
 
         <div class="infoBox stack">
+
           <h2>Anonymitet och GDPR</h2>
+
           <p class="muted">
-            Testet är anonymt och gratis. Inga personuppgifter sparas eller delas.
-            Testet är utformat för att följa svensk lagstiftning och EU:s
-            dataskyddsförordning, GDPR.
+            Testet är anonymt och gratis.
+            Inga personuppgifter lagras eller delas.
+            Testet är utformat för att följa svensk lagstiftning
+            samt EU:s dataskyddsförordning GDPR.
           </p>
+
         </div>
 
         <p class="muted">
-          Genom att starta testet bekräftar du att du har tagit del av informationen ovan.
+          Genom att starta testet godkänner du att du har tagit del av informationen ovan.
         </p>
 
-        <button class="btn" id="startBtn">Starta testet</button>
+        <button class="btn" id="startBtn">
+          Starta testet
+        </button>
+
       </div>
     `;
 
@@ -438,39 +459,55 @@ function render(){
   }
 
   if(idx >= QUESTIONS.length){
+
     const {scores} = summary();
-    const sorted = Object.entries(scores).sort((a,b) => a[1] - b[1]);
+
+    const sorted = Object.entries(scores).sort((a,b)=>a[1]-b[1]);
+
     const lowestArea = sorted[0][0];
     const lowestVal = sorted[0][1];
 
     app.innerHTML = `
+
       <h1>Ditt resultat</h1>
 
       <div class="grid">
+
         ${AREAS.map(a => `
+
           <div class="stack">
+
             <div style="display:flex;justify-content:space-between">
+
               <strong>${a}</strong>
               <span>${scores[a]}%</span>
+
             </div>
+
             <div class="bar">
               <div style="width:${scores[a]}%"></div>
             </div>
+
           </div>
+
         `).join("")}
+
       </div>
 
       <div class="hr"></div>
 
       <div class="infoBox stack">
+
         <h2>Fördjupande test</h2>
 
         <p class="muted">
-          Ditt lägsta område är <strong>${lowestArea}</strong> (${lowestVal}%).
-          Du kan köpa det fördjupande testet för 19 kr via Swish.
+          Ditt lägsta område är:
+          <strong>${lowestArea}</strong>
+          (${lowestVal}%)
         </p>
 
         <div class="swishBox stack">
+
           <div class="price">19 kr</div>
 
           <p class="muted">
@@ -482,32 +519,82 @@ function render(){
           </div>
 
           <img
-            src="https://github.com/kalleandersson872-design/Coachingtest/blob/main/swish.JPG?raw=true"
-            alt="QR-kod för Swishbetalning"
+            src="swish-qr.jpeg"
+            alt="QR-kod Swish"
             class="qr"
           />
 
           <p class="muted">
-            Skriv <strong>${lowestArea}</strong> som meddelande i Swish.
-            Efter betalning får du tillgång till det fördjupande testet.
+            Skriv:
+            <strong>${lowestArea}</strong>
+            i meddelandet.
           </p>
 
-          <button
-            class="cta"
-            onclick="window.location.href='swish://paymentrequest?amount=19&message=${encodeURIComponent(lowestArea)}'"
-          >
-            Betala 19 kr med Swish
+          <button class="cta" id="paidBtn">
+            Jag har betalat
           </button>
+
+          <div id="passwordArea" class="stack" style="display:none">
+
+            <input
+              type="password"
+              id="accessCode"
+              class="codeInput"
+              placeholder="Ange lösenord"
+            />
+
+            <button class="cta" id="unlockBtn">
+              Öppna fördjupande test
+            </button>
+
+            <div id="codeMsg" class="muted"></div>
+
+          </div>
+
         </div>
+
       </div>
 
       <div class="hr"></div>
 
-      <div class="btnRow">
-        <button class="btn sec" onclick="window.print()">Skriv ut / PDF</button>
-        <button class="btn" onclick="location.reload()">Gör om testet</button>
+      <div class="actions">
+
+        <button class="btn sec" onclick="window.print()">
+          Skriv ut / PDF
+        </button>
+
+        <button class="btn" onclick="location.reload()">
+          Gör om testet
+        </button>
+
       </div>
     `;
+
+    const targetUrl = LINKS[lowestArea];
+
+    document.getElementById("paidBtn").onclick = () => {
+      document.getElementById("passwordArea").style.display = "grid";
+    };
+
+    document.getElementById("unlockBtn").onclick = () => {
+
+      const code = document.getElementById("accessCode").value.trim();
+
+      if(code === "hejhej123"){
+        window.location.href = targetUrl;
+      } else {
+        document.getElementById("codeMsg").textContent =
+          "Fel lösenord. Försök igen.";
+      }
+    };
+
+    document.getElementById("accessCode")
+      .addEventListener("keydown", function(e){
+
+      if(e.key === "Enter"){
+        document.getElementById("unlockBtn").click();
+      }
+    });
 
     return;
   }
@@ -517,42 +604,71 @@ function render(){
   const pct = progress();
 
   app.innerHTML = `
+
     <div class="topbar">
+
       <h1>Coachingtest – Livskvalitet</h1>
-      <div class="muted">Fråga ${idx + 1} av ${QUESTIONS.length} · ${pct}%</div>
+
+      <div class="muted">
+        Fråga ${idx + 1} av ${QUESTIONS.length}
+        · ${pct}%
+      </div>
+
     </div>
 
     <div class="prog">
       <div style="width:${pct}%"></div>
     </div>
 
-    <div class="stack" style="margin-top:16px">
-      <div class="qarea">${q.area}</div>
-      <div class="qtext">${q.text}</div>
+    <div class="stack" style="margin-top:18px">
+
+      <div class="qarea">
+        ${q.area}
+      </div>
+
+      <div class="qtext">
+        ${q.text}
+      </div>
+
       <div class="row" id="opts"></div>
+
     </div>
 
     <div class="actions">
-      <button class="btn sec" ${idx === 0 ? "disabled" : ""} id="backBtn">
+
+      <button
+        class="btn sec"
+        ${idx===0?'disabled':''}
+        id="backBtn"
+      >
         Tillbaka
       </button>
 
-      <button class="btn" ${val ? "" : "disabled"} id="nextBtn">
-        ${idx < QUESTIONS.length - 1 ? "Nästa" : "Visa resultat"}
+      <button
+        class="btn"
+        ${val ? '' : 'disabled'}
+        id="nextBtn"
+      >
+        ${idx < QUESTIONS.length - 1 ? 'Nästa' : 'Visa resultat'}
       </button>
+
     </div>
 
     <div class="footnote">
-      Använd siffrorna 1–5, Enter och piltangenterna.
+      Du kan använda siffrorna 1–5, Enter och piltangenterna.
     </div>
   `;
 
   const opts = document.getElementById("opts");
 
   if(q.type === "yn"){
+
     ["Ja","Nej"].forEach(opt => {
+
       const el = document.createElement("div");
+
       el.className = "pill" + (val === opt ? " sel" : "");
+
       el.textContent = opt;
 
       el.onclick = () => {
@@ -562,10 +678,15 @@ function render(){
 
       opts.appendChild(el);
     });
+
   } else {
+
     [1,2,3,4,5].forEach(n => {
+
       const el = document.createElement("div");
+
       el.className = "pill" + (val === n ? " sel" : "");
+
       el.textContent = n;
 
       el.onclick = () => {
@@ -582,26 +703,32 @@ function render(){
 }
 
 document.addEventListener("keydown", function(e){
+
   if(!started || idx >= QUESTIONS.length){
     return;
   }
 
   const q = QUESTIONS[idx];
 
-  if(q.type === "scale" && ["1","2","3","4","5"].includes(e.key)){
+  if(q.type === "scale" &&
+    ["1","2","3","4","5"].includes(e.key)){
+
     answers[q.id] = Number(e.key);
     render();
     return;
   }
 
   if(q.type === "yn"){
+
     if(e.key === "1" || e.key === "ArrowLeft"){
+
       answers[q.id] = "Ja";
       render();
       return;
     }
 
     if(e.key === "2" || e.key === "ArrowRight"){
+
       answers[q.id] = "Nej";
       render();
       return;
@@ -624,6 +751,8 @@ document.addEventListener("keydown", function(e){
 });
 
 render();
+
 </script>
+
 </body>
 </html>
